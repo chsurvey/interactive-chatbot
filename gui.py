@@ -12,6 +12,10 @@ class ChatWindow:
         self.entry.bind("<Return>", self.on_send)
         self.send_callback = send_callback
 
+    def mainloop(self):
+        """Run the Tkinter event loop."""
+        self.root.mainloop()
+
     def on_send(self, event=None):
         msg = self.entry.get().strip()
         if msg:
