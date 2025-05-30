@@ -37,3 +37,4 @@ if __name__ == '__main__':
         asyncio.run(server.start())
     except KeyboardInterrupt:
         print("Server stopped.")
+
