@@ -2,7 +2,10 @@ import subprocess
 import sys
 import time
 import os
-from client import UserClient
+import threading
+import queue
+from client import GUIUserClient
+from gui import ChatWindow, LogWindow
 
 SERVER_SCRIPT = "server.py"
 CLIENT_SCRIPT = "client.py"
@@ -16,18 +19,41 @@ def main():
     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     time.sleep(1)  # give server time to bind
 
-    # 2. Launch GPT bot in background (no console window)
+    # 2. Launch GPT bot and capture logs
     gpt_proc = subprocess.Popen(
         [sys.executable, CLIENT_SCRIPT, "gpt"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        stdin=subprocess.DEVNULL,
-        creationflags=(subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
     )
 
+    chat_window = ChatWindow(lambda msg: None)
+    log_window = LogWindow(chat_window.root)
+    log_queue: queue.Queue[str] = queue.Queue()
+
+    def log_reader():
+        for line in gpt_proc.stdout:
+            log_queue.put(line.rstrip())
+
+    threading.Thread(target=log_reader, daemon=True).start()
+    chat_client = GUIUserClient("ws://localhost:8765", chat_window.append_message)
+    chat_window.send_callback = chat_client.send_message
+
+    def client_thread():
+        chat_client.run()
+
+    threading.Thread(target=client_thread, daemon=True).start()
+
+    def poll_logs():
+        while not log_queue.empty():
+            log_window.append_log(log_queue.get())
+        chat_window.root.after(100, poll_logs)
+
+    poll_logs()
+
     try:
-        # 3. Run user client interactively in foreground
-        UserClient("ws://localhost:8765").run()
+        chat_window.mainloop()
     finally:
         server_proc.terminate()
         gpt_proc.terminate()
