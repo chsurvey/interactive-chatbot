@@ -83,6 +83,7 @@ class GPTClient(ChatClient):
         self.message_history: List[Dict[str, str]] = [
             {"role": "system", "content": "컴퓨터공학과 대학생 친구이다. 단답 위주의 20대 남성의 말투 소유."},
         ]
+        self.thought = []
 
     def extra_tasks(self, ws):
         return [self.think_loop()]
@@ -106,7 +107,9 @@ class GPTClient(ChatClient):
             await asyncio.sleep(15)
             loop = asyncio.get_event_loop()
             thought: str = await loop.run_in_executor(None, self.generate_thought)
-            print(f"[GPT think] {thought}")
+            print(f"[GPT think] {thought}", flush=True)
+            self.thought.append({"role": "system", "content": thought})
+
 
     def generate_response(self) -> str:
         try:
@@ -127,8 +130,8 @@ class GPTClient(ChatClient):
             completion = openai_client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "대화 내용을 간략히 정리"},
-                    {"role": "user", "content": str(self.message_history)},
+                    {"role": "system", "content": "최근 기준으로 대화 내용을 간략히 정리"},
+                    {"role": "user", "content": str(self.message_history[-3:])},
                 ],
                 temperature=0.5,
                 max_tokens=30,

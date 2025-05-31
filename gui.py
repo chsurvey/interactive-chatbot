@@ -32,12 +32,12 @@ class ChatWindow:
         self.root.mainloop()
 
 class LogWindow:
-    def __init__(self, root: tk.Misc):
+    def __init__(self, master: tk.Misc):
         """Create a log window attached to an existing Tk root."""
-        self.root = tk.Toplevel(root)
+        self.win = tk.Toplevel(master)
 
-        self.root.title("GPT Logs")
-        self.text = ScrolledText(self.root, state="disabled", width=60, height=20)
+        self.win.title("GPT Logs")
+        self.text = ScrolledText(self.win, state="disabled", width=60, height=20)
         self.text.pack(padx=5, pady=5)
 
     def append_log(self, msg: str):

@@ -21,7 +21,7 @@ def main():
 
     # 2. Launch GPT bot and capture logs
     gpt_proc = subprocess.Popen(
-        [sys.executable, CLIENT_SCRIPT, "gpt"],
+        [sys.executable, "-u", CLIENT_SCRIPT, "gpt"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
