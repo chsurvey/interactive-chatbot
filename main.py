@@ -37,6 +37,7 @@ def main():
             log_queue.put(line.rstrip())
 
     threading.Thread(target=log_reader, daemon=True).start()
+    
     chat_client = GUIUserClient("ws://localhost:8765", chat_window.append_message)
     chat_window.send_callback = chat_client.send_message
 
