@@ -28,7 +28,8 @@ def main():
         bufsize=1,
     )
 
-    log_window = LogWindow()
+    chat_window = ChatWindow(lambda msg: None)
+    log_window = LogWindow(chat_window.root)
     log_queue: queue.Queue[str] = queue.Queue()
 
     def log_reader():
@@ -36,8 +37,7 @@ def main():
             log_queue.put(line.rstrip())
 
     threading.Thread(target=log_reader, daemon=True).start()
-
-    chat_window = ChatWindow(lambda msg: None)
+    
     chat_client = GUIUserClient("ws://localhost:8765", chat_window.append_message)
     chat_window.send_callback = chat_client.send_message
 

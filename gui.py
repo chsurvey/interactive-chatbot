@@ -12,10 +12,6 @@ class ChatWindow:
         self.entry.bind("<Return>", self.on_send)
         self.send_callback = send_callback
 
-    def mainloop(self):
-        """Run the Tkinter event loop."""
-        self.root.mainloop()
-
     def on_send(self, event=None):
         msg = self.entry.get().strip()
         if msg:
@@ -30,10 +26,16 @@ class ChatWindow:
             self.text.configure(state="disabled")
             self.text.see(tk.END)
         self.text.after(0, _append)
+        
+    def mainloop(self):
+        """Run the Tkinter main loop."""
+        self.root.mainloop()
 
 class LogWindow:
-    def __init__(self):
-        self.root = tk.Toplevel()
+    def __init__(self, root: tk.Misc):
+        """Create a log window attached to an existing Tk root."""
+        self.root = tk.Toplevel(root)
+
         self.root.title("GPT Logs")
         self.text = ScrolledText(self.root, state="disabled", width=60, height=20)
         self.text.pack(padx=5, pady=5)
